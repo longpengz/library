@@ -25,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -32,6 +33,7 @@ import org.springframework.util.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author longpengZ
@@ -43,7 +45,6 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
     private final PermissionRepository permissionRepository;
     private final ManagerPermissionRepository managerPermissionRepository;
     private final ManagerPermissionMapper managerPermissionMapper;
-    private final List<Permission> permissions = new ArrayList<>();
 
 
     @Override
@@ -91,7 +92,7 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
     @Transactional
     public void insertManagerPermission(Manager manager,List<Permission> permissions){
         managerPermissionMapper.deleteByManagerId(manager.getId());
-        if(ObjectUtils.isEmpty(permissions)){
+        if(CollectionUtils.isEmpty(permissions)){
             return;
         }
         permissions.forEach(it -> managerPermissionRepository.save(ManagerPermission.builder()
@@ -126,9 +127,6 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
         }
         ManagerLoginRes managerLoginRes = new ManagerLoginRes();
         BeanUtils.copyProperties(manager, managerLoginRes);
-        if(!ManagerTypeEnum.SUPER.equals(managerLoginRes.getType())){
-
-        }
         managerLoginRes.setToken(token);
         return managerLoginRes;
     }
@@ -154,19 +152,36 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
         if(ObjectUtils.isEmpty(manager)){
             APIError.NOT_FOUND();
         }
-        // TODO 获取权限重写
+        List<Integer> permissionIds = managerPermissionRepository.findAll(Specifications.<ManagerPermission>and()
+                        .eq("presenceStatus", 1)
+                        .eq("managerId", manager.getId()).build())
+                .stream().map(ManagerPermission::getPermissionId).toList();
+        manager.setPermissions(permissionRepository.findAll(Specifications.<Permission>and()
+                .eq("presenceStatus",1)
+                .in("id", permissionIds).build()));
         return manager;
     }
 
     @Override
     public List<Permission> getPermissions(){
-        return permissions;
+        return permissionRepository.findAll(Specifications.<Permission>and()
+                .eq("presenceStatus",1).build());
     }
 
     @Override
     @Transactional
     public void deleteManager(String ids){
         managerRepository.softDelete(StringUtil.toIntArray(ids));
+    }
+
+    @Override
+    public void insertPermission(Permission permission) {
+        permissionRepository.findOne(Specifications.<Permission>and()
+                .eq("presenceStatus",1)
+                .eq("method", permission.getMethod())
+                .eq("path", permission.getPath()).build())
+                .ifPresent(it -> permission.setId(it.getId()));
+        permissionRepository.save(permission);
     }
 
 }

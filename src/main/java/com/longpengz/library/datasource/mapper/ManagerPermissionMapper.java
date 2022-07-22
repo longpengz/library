@@ -4,6 +4,7 @@ import com.longpengz.library.datasource.mapper.filter.ManagerPermissionFilter;
 import com.longpengz.library.modle.entity.Permission;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.jdbc.SQL;
 import org.springframework.util.ObjectUtils;
@@ -16,8 +17,10 @@ public interface ManagerPermissionMapper {
     @Delete("delete from manager_permission where manager_id = #{managerId}")
     void deleteByManagerId(Integer managerId);
 
-//    @SelectProvider(type = ManagerPermissionProvider.class, method = "getManagerPermission")
-//    List<ManageMenu> getManageMenus(ManagerPermissionFilter managerPermissionFilter);
+    @Select(" select IFNULL(count(mp.id), 0) " +
+            " from manager_permission mp left join permission p on mp.permission_id = p.id" +
+            " where mp.manager_id = #{managerId} and p.path = #{path} and p.method = #{method}")
+    Integer isManagerPermission(Integer managerId, String path, String method);
 
     @SelectProvider(type = ManagerPermissionProvider.class, method = "getManagerPermission")
     List<Permission> getPermissions(ManagerPermissionFilter managerPermissionFilter);

@@ -1,5 +1,6 @@
 package com.longpengz.library.controller.manage;
 
+import com.longpengz.library.annotation.AnonUrl;
 import com.longpengz.library.modle.constants.RestPrefixConstant;
 import com.longpengz.library.modle.request.InitManagerReq;
 import com.longpengz.library.modle.request.ManagerLoginReq;
@@ -21,18 +22,21 @@ public class ManagerLoginManage {
 
     private final ManagerPermissionService managerPermissionService;
 
+    @AnonUrl
     @PostMapping("login")
     @ApiOperation("登陆")
     public API<ManagerLoginRes> login(@RequestBody @Valid ManagerLoginReq managerLoginReq){
         return API.ok(managerPermissionService.managerLogin(managerLoginReq));
     }
 
+    @AnonUrl
     @GetMapping("loginInfo")
     @ApiOperation("获取登陆信息")
     public API<ManagerLoginRes> getInfo(){
         return API.ok(managerPermissionService.getLoginInfo());
     }
 
+    @AnonUrl
     @PostMapping("initManager")
     @ApiOperation("初始化超级管理员")
     public API<String> initSuperManager(@RequestBody @Valid InitManagerReq initManagerReq){

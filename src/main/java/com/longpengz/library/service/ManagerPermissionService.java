@@ -72,6 +72,12 @@ public interface ManagerPermissionService {
      */
     void deleteManager(String ids);
 
+    /**
+     * 添加编辑权限
+     * @author longpengZ
+     */
+    void insertPermission(Permission permission);
+
 
 
 }
