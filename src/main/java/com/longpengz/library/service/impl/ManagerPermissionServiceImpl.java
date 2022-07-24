@@ -158,7 +158,7 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
                 .stream().map(ManagerPermission::getPermissionId).toList();
         manager.setPermissions(permissionRepository.findAll(Specifications.<Permission>and()
                 .eq("presenceStatus",1)
-                .in("id", permissionIds).build()));
+                .in("id", permissionIds.toArray()).build()));
         return manager;
     }
 
@@ -181,6 +181,7 @@ public class ManagerPermissionServiceImpl extends BaseService implements Manager
                 .eq("method", permission.getMethod())
                 .eq("path", permission.getPath()).build())
                 .ifPresent(it -> permission.setId(it.getId()));
+        permission.setPresenceStatus(1);
         permissionRepository.save(permission);
     }
 
