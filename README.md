@@ -23,3 +23,6 @@
 # 项目基础
 springboot 单体应用项目、数据库mysql、缓存redis
 
+# 接口
+后台管理请求请求头权限校验字段 manageToken 为管理登陆返回token
+

@@ -37,3 +37,4 @@ mvnw.cmd
 
 application-prd.properties
 application-local.properties
+release.txt
